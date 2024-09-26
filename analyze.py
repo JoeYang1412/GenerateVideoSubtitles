@@ -3,7 +3,7 @@ import pysrt
 import time_process
 import opencc
 class speechToTextOnWhisperModel:
-    
+    offset = 0.0
     def __init__(self,  device_setting="cuda", compute_type_setting="float16"):
         self.device = device_setting
         self.compute_type = compute_type_setting
@@ -30,12 +30,17 @@ class speechToTextOnWhisperModel:
     
     
     def outputSrt(self, output_srt_file):
-        srt = pysrt.SubRipFile()
-        for i, segment in enumerate(self.segments):
-            start = time_process.time_process(segment.start).process()
-            end = time_process.time_process(segment.end).process()
-            srt.append(pysrt.SubRipItem(index=i,start=start ,end=end , text=self.outputTraditionalTxt(segment.text)))
-        srt.save(output_srt_file)
+        try:
+            srt = pysrt.open(output_srt_file, encoding='utf-8')
+        except FileNotFoundError:
+            srt = pysrt.SubRipFile()
+
+        for i, segment in enumerate(self.segments, start=len(srt) + 1):
+            start = time_process.time_process(segment.start+self.offset).process()
+            end = time_process.time_process(segment.end+self.offset).process()
+            srt.append(pysrt.SubRipItem(index=i, start=start, end=end, text=self.outputTraditionalTxt(segment.text)))
+
+        srt.save(output_srt_file, encoding='utf-8')
 
 
     def outputTraditionalTxt(self, simplified_text):

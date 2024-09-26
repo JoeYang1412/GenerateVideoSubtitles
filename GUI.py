@@ -20,10 +20,12 @@ class DownloadAndProcessThread(QThread):
         self.voice_separation = voice_separation
         self.output_selected_option = output_selected_option
 
-    def model_process(self, filename):
+    def model_process(self, filename,count):
+        
         #speechToTextOnWhisperModel是個class，處理語音轉文字，這邊是初始化
         #設定使用cuda，計算型態為float16
         process_audio = speechToTextOnWhisperModel()
+        process_audio.offset = count*300
         process_audio.setDeviceSetting('cuda')
         process_audio.setComputeTypeSetting('float16')
 
@@ -44,19 +46,33 @@ class DownloadAndProcessThread(QThread):
     def run(self):
         #這邊是執行緒的主要程式
         try:
+            count=0
             #如果input_text是網址，就下載檔案
             if self.input_text.startswith("https"):
                 self.progress.emit("下載中")
                 #Download是個class，處理下載檔案
                 download = Download(self.input_text, "./")
                 #下載音訊檔案
-                filename = download.download_m4a()
-                self.progress.emit("下載完成")
-                #將下載的音訊檔案轉換成wav
-                need_process=now_convert.VideoConvert(filename, "./")
-                self.progress.emit(need_process.m4a_convert_to_wav())
-                #執行模型
-                self.model_process(filename)
+                time=download.get_time_info()
+                if time>300:
+                    self.progress.emit("影片長度超過5分鐘")
+                    for i in range(0,time,300):
+                        filename = download.download_section_m4a(i, i+300)
+                        self.progress.emit("下載完成")
+                        #將下載的音訊檔案轉換成wav
+                        need_process=now_convert.VideoConvert(filename, "./")
+                        self.progress.emit(need_process.m4a_convert_to_wav())
+                        #執行模型
+                        self.model_process(filename,count)
+                        count=count+1
+                else:
+                    filename = download.download_m4a()
+                    self.progress.emit("下載完成")
+                    #將下載的音訊檔案轉換成wav
+                    need_process=now_convert.VideoConvert(filename, "./")
+                    self.progress.emit(need_process.m4a_convert_to_wav())
+                    #執行模型
+                    self.model_process(filename,count)
             else:
                 #如果input_text是本地檔案，就直接轉換成wav
                 need_process = now_convert.VideoConvert(self.input_text, "./")
