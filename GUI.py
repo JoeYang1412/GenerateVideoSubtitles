@@ -4,7 +4,7 @@ from PyQt5.QtCore import QThread, pyqtSignal
 from analyze import speechToTextOnWhisperModel
 from download import Download
 import convert as now_convert
-
+import os
 class DownloadAndProcessThread(QThread):
     progress = pyqtSignal(str)
     finished = pyqtSignal()
@@ -39,9 +39,11 @@ class DownloadAndProcessThread(QThread):
 
         #輸出檔案
         if self.output_selected_option == "文字檔(.txt)":
-            process_audio.outputTxt("./result.txt")
+            process_audio.outputTxt("./result.txt",count)
+            
         elif self.output_selected_option == "字幕檔(.srt)":
-            process_audio.outputSrt("./result.srt")
+            process_audio.outputSrt("./result.srt",count)
+           
     
     def run(self):
         #這邊是執行緒的主要程式
@@ -61,16 +63,18 @@ class DownloadAndProcessThread(QThread):
                         self.progress.emit("下載完成")
                         #將下載的音訊檔案轉換成wav
                         need_process=now_convert.VideoConvert(filename, "./")
-                        self.progress.emit(need_process.m4a_convert_to_wav())
+                        new_name=need_process.m4a_convert_to_wav()
+                        #移除m4a檔案
+                        os.remove(filename)
                         #執行模型
-                        self.model_process(filename,count)
+                        self.model_process(new_name,count)
                         count=count+1
                 else:
                     filename = download.download_m4a()
                     self.progress.emit("下載完成")
                     #將下載的音訊檔案轉換成wav
                     need_process=now_convert.VideoConvert(filename, "./")
-                    self.progress.emit(need_process.m4a_convert_to_wav())
+                    filename=need_process.m4a_convert_to_wav()
                     #執行模型
                     self.model_process(filename,count)
             else:
@@ -88,7 +92,7 @@ class DownloadAndProcessThread(QThread):
         
                 self.progress.emit("轉換完成")
                 #執行模型
-                self.model_process(filename)
+                self.model_process(filename,count)
             
 
             self.progress.emit("完成")

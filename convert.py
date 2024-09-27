@@ -29,6 +29,5 @@ class VideoConvert:
         self.final_output_path = self.output_path + self.input_path[:-4]+'.wav'
         audio=AudioFileClip(self.input_path)
         audio.write_audiofile(self.final_output_path)
-        print(self.final_output_path)
-        return "轉換完成"
+        return self.final_output_path
     
