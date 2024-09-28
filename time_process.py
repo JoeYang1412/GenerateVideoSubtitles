@@ -1,5 +1,4 @@
-# We will create a class that will take the time in seconds and convert it into hours, minutes and seconds.
-import datetime
+
 class time_process:
     def __init__(self,need_process):
         self.secondsProcess = need_process

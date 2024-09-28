@@ -9,15 +9,13 @@ class DownloadAndProcessThread(QThread):
     progress = pyqtSignal(str)
     finished = pyqtSignal()
 
-    def __init__(self, input_text, selected_option, voice_separation, output_selected_option):
+    def __init__(self, input_text, selected_option, output_selected_option):
         super().__init__()
         #input_text: 輸入的網址或是檔案
         #selected_option: 選擇的模型大小
-        #voice_separation: 是否啟用音訊分離
         #output_selected_option: 輸出的格式
         self.input_text = input_text
         self.selected_option = selected_option
-        self.voice_separation = voice_separation
         self.output_selected_option = output_selected_option
 
     def model_process(self, filename,count):
@@ -118,28 +116,28 @@ class MyApp(QMainWindow):
         main_layout = QVBoxLayout()
         
 
-        input_group_box = QGroupBox("選擇來源")
+        input_group_box = QGroupBox("選擇來源(select source)")
         input_layout = QVBoxLayout()
 
-        self.url_radio = QRadioButton("線上來源")
+        self.url_radio = QRadioButton("線上來源(Online Source)")
         self.url_radio.setChecked(True)
         self.url_radio.toggled.connect(self.toggle_input_method)
         input_layout.addWidget(self.url_radio)
 
-        self.file_radio = QRadioButton("本地檔案")
+        self.file_radio = QRadioButton("本地檔案(Local File)")
         self.file_radio.toggled.connect(self.toggle_input_method)
         input_layout.addWidget(self.file_radio)
 
         self.url_input = QLineEdit(self)
-        self.url_input.setPlaceholderText("輸入要處理的影片網址")
+        self.url_input.setPlaceholderText("輸入要處理的影片網址(Enter the video URL to process)")
         input_layout.addWidget(self.url_input)
 
         self.file_input = QLineEdit(self)
-        self.file_input.setPlaceholderText("選擇要處理的本地影片檔案")
+        self.file_input.setPlaceholderText("選擇要處理的本地影片檔案(Choose the local video file to process)")
         self.file_input.setEnabled(False)
         input_layout.addWidget(self.file_input)
 
-        self.file_button = QPushButton("瀏覽", self)
+        self.file_button = QPushButton("瀏覽(Browse)", self)
         self.file_button.setEnabled(False)
         self.file_button.clicked.connect(self.browse_file)
         input_layout.addWidget(self.file_button)
@@ -148,7 +146,7 @@ class MyApp(QMainWindow):
         main_layout.addWidget(input_group_box)
 
 
-        groupBox = QGroupBox("選擇模型大小")
+        groupBox = QGroupBox("選擇模型大小(Select model size)")
         vbox = QVBoxLayout()
         self.radio_buttons = []
         options = ["small", "medium", "large", "large-v2", "large-v3"]
@@ -161,7 +159,7 @@ class MyApp(QMainWindow):
 
         #選擇輸出txt或是srt
 
-        groupBox2 = QGroupBox("輸出格式")
+        groupBox2 = QGroupBox("輸出格式(Select output format)")
         vbox1 = QVBoxLayout()
         self.outputSel_buttons = []
         selOptions = ["文字檔(.txt)", "字幕檔(.srt)"]
@@ -171,18 +169,6 @@ class MyApp(QMainWindow):
             vbox1.addWidget(outputSel_button)
         groupBox2.setLayout(vbox1)
         main_layout.addWidget(groupBox2)
-
-
-
-
-        groupBox3 = QGroupBox("音訊分離")
-        vbox2 = QVBoxLayout()
-        self.radio_buttons2 = []
-        radio_buttons2 = QRadioButton("啟用音訊分離")
-        self.radio_buttons2.append(radio_buttons2)
-        vbox2.addWidget(radio_buttons2)
-        groupBox3.setLayout(vbox2)
-        main_layout.addWidget(groupBox3)
 
 
         self.progress_display = QTextEdit(self)
@@ -212,7 +198,6 @@ class MyApp(QMainWindow):
 
     def startButtonClicked(self):
         selected_option = self.get_selected_option()
-        voice_separation = self.get_voice_separation_selected_option()
         output_selected_option = self.get_output_selected_option()
         if selected_option is None:
             self.progress_display.append("請選擇一個選項")
@@ -221,8 +206,6 @@ class MyApp(QMainWindow):
             self.progress_display.append("請選擇一個輸出選項")
             return
         
-        if voice_separation:
-            self.progress_display.append("音訊分離已啟用")
 
         input_text = self.url_input.text() if self.url_radio.isChecked() else self.file_input.text()
         
@@ -230,12 +213,21 @@ class MyApp(QMainWindow):
             self.progress_display.append("請輸入一個有效的輸入")
             return
 
+        self.url_radio .setEnabled(False)
+        self.file_radio.setEnabled(False)
         self.start_button.setEnabled(False)
         self.url_input.setEnabled(False)
         self.file_input.setEnabled(False)
         self.file_button.setEnabled(False)
+        for radio_button in self.radio_buttons:
+            radio_button.setEnabled(False)
+        for outputSel_button in self.outputSel_buttons:
+            outputSel_button.setEnabled(False)
 
-        self.download_thread = DownloadAndProcessThread(input_text, selected_option, voice_separation, output_selected_option)
+    
+        
+
+        self.download_thread = DownloadAndProcessThread(input_text, selected_option, output_selected_option)
         self.download_thread.progress.connect(self.update_progress)
         self.download_thread.finished.connect(self.on_finished)
         self.download_thread.start()
@@ -245,9 +237,17 @@ class MyApp(QMainWindow):
 
     def on_finished(self):
         self.start_button.setEnabled(True)
-        self.url_input.setEnabled(True)
-        self.file_input.setEnabled(True)
-        self.file_button.setEnabled(True)
+        if self.url_radio.isChecked():
+            self.url_input.setEnabled(True)
+        else:
+            self.file_input.setEnabled(True)
+            self.file_button.setEnabled(True)
+        for radio_button in self.radio_buttons:
+            radio_button.setEnabled(True)
+        for outputSel_button in self.outputSel_buttons:
+            outputSel_button.setEnabled(True)
+        self.url_radio .setEnabled(True)
+        self.file_radio.setEnabled(True)
         self.progress_display.append("可以進行下一次操作")
     
                                             
@@ -265,12 +265,6 @@ class MyApp(QMainWindow):
         return None
 
 
-
-    def get_voice_separation_selected_option(self):
-        for radio_buttons2 in self.radio_buttons2:
-            if radio_buttons2.isChecked():
-                return True
-        return None
     
     
    

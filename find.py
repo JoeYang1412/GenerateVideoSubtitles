@@ -1,3 +1,7 @@
+#this function is used to find the string in the file
+#but it is not used in the code
+#此程式未完成
+
 def find_string_in_file(file_path, string_to_search):
     line_number = 0
     list_of_results = []
