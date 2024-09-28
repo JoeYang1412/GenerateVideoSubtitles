@@ -107,7 +107,7 @@ class MyApp(QMainWindow):
         self.initUI()
 
     def initUI(self):
-        self.setWindowTitle('語音轉文字系統')
+        self.setWindowTitle('語音轉文字系統(Speech to Text System)')
         self.setGeometry(100, 100, 600, 400)
 
         widget = QWidget()
