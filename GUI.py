@@ -9,7 +9,7 @@ class DownloadAndProcessThread(QThread):
     progress = pyqtSignal(str)
     finished = pyqtSignal()
 
-    def __init__(self, input_text, selected_option, output_selected_option):
+    def __init__(self, input_text, selected_option, output_selected_option,sel_lang_option):
         super().__init__()
         #input_text: 輸入的網址或是檔案
         #selected_option: 選擇的模型大小
@@ -17,6 +17,7 @@ class DownloadAndProcessThread(QThread):
         self.input_text = input_text
         self.selected_option = selected_option
         self.output_selected_option = output_selected_option
+        self.sel_lang_option=sel_lang_option
 
     def model_process(self, filename,count):
         
@@ -29,11 +30,19 @@ class DownloadAndProcessThread(QThread):
 
         #設定模型種類
         self.progress.emit(f"選擇的選項是: {self.selected_option}")
+        self.progress.emit(f"選擇的語言: {self.sel_lang_option}")
         self.progress.emit("處理中")
         process_audio.setModelSize(self.selected_option)
 
         #執行模型
-        process_audio.runModel(filename)
+        if self.sel_lang_option == "中文(Chinese)":
+            process_audio.run_model_with_chinese(filename)
+        elif self.sel_lang_option == "英文(English)":
+            process_audio.run_model_with_english(filename)
+        elif self.sel_lang_option == "日文(Japanese)":
+            process_audio.run_model_with_japanese(filename)
+        elif self.sel_lang_option == "自動(Auto)":
+            process_audio.runModel(filename)
 
         #輸出檔案
         if self.output_selected_option == "文字檔(.txt)":
@@ -157,6 +166,21 @@ class MyApp(QMainWindow):
         groupBox.setLayout(vbox)
         main_layout.addWidget(groupBox)
 
+        groupBoxSelLang = QGroupBox("選擇語言(Select language)")
+        vboxSelLang = QVBoxLayout()
+        self.lang_buttons = []
+        langOptions = ["自動(Auto)","中文(Chinese)", "英文(English)","日文(Japanese)"]
+        
+        for langOption in langOptions:
+            lang_button = QRadioButton(langOption)
+            self.lang_buttons.append(lang_button)
+            vboxSelLang.addWidget(lang_button)
+        self.lang_buttons[0].setChecked(True)
+        groupBoxSelLang.setLayout(vboxSelLang)
+        main_layout.addWidget(groupBoxSelLang)
+
+
+
         #選擇輸出txt或是srt
 
         groupBox2 = QGroupBox("輸出格式(Select output format)")
@@ -199,6 +223,7 @@ class MyApp(QMainWindow):
     def startButtonClicked(self):
         selected_option = self.get_selected_option()
         output_selected_option = self.get_output_selected_option()
+        sel_lang_option = self.get_sel_lang()
         if selected_option is None:
             self.progress_display.append("請選擇一個選項")
             return
@@ -219,15 +244,17 @@ class MyApp(QMainWindow):
         self.url_input.setEnabled(False)
         self.file_input.setEnabled(False)
         self.file_button.setEnabled(False)
+        
         for radio_button in self.radio_buttons:
             radio_button.setEnabled(False)
         for outputSel_button in self.outputSel_buttons:
             outputSel_button.setEnabled(False)
-
+        for lang_button in self.lang_buttons:
+            lang_button.setEnabled(False)
     
         
 
-        self.download_thread = DownloadAndProcessThread(input_text, selected_option, output_selected_option)
+        self.download_thread = DownloadAndProcessThread(input_text, selected_option, output_selected_option,sel_lang_option)
         self.download_thread.progress.connect(self.update_progress)
         self.download_thread.finished.connect(self.on_finished)
         self.download_thread.start()
@@ -246,6 +273,9 @@ class MyApp(QMainWindow):
             radio_button.setEnabled(True)
         for outputSel_button in self.outputSel_buttons:
             outputSel_button.setEnabled(True)
+        for lang_button in self.lang_buttons:
+            lang_button.setEnabled(True)
+
         self.url_radio .setEnabled(True)
         self.file_radio.setEnabled(True)
         self.progress_display.append("可以進行下一次操作")
@@ -264,7 +294,12 @@ class MyApp(QMainWindow):
                 return outputSel_button.text()
         return None
 
-
+    def get_sel_lang(self):
+        for lang_button in self.lang_buttons:
+            if lang_button.isChecked():
+                return lang_button.text()
+        return None
+        
     
     
    

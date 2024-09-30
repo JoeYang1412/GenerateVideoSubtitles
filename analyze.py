@@ -2,6 +2,9 @@ from faster_whisper import WhisperModel
 import pysrt
 import time_process
 import opencc
+import logging
+
+
 class speechToTextOnWhisperModel:
     # offset is the time offset in seconds，process long audio in segments
     offset = 0.0
@@ -23,6 +26,16 @@ class speechToTextOnWhisperModel:
     def runModel(self, input_audio):
         self.model = WhisperModel(self.model_size, device=self.device, compute_type=self.compute_type)
         self.segments, self.info = self.model.transcribe(input_audio, beam_size=5)
+    def run_model_with_chinese(self,input_audio):
+        
+        self.model = WhisperModel(self.model_size, device=self.device, compute_type=self.compute_type)
+        self.segments, self.info = self.model.transcribe(input_audio, beam_size=5, language="zh")
+    def run_model_with_english(self,input_audio):
+        self.model = WhisperModel(self.model_size, device=self.device, compute_type=self.compute_type)
+        self.segments, self.info = self.model.transcribe(input_audio, beam_size=5, language="en")    
+    def run_model_with_japanese(self,input_audio):
+        self.model = WhisperModel(self.model_size, device=self.device, compute_type=self.compute_type)
+        self.segments, self.info = self.model.transcribe(input_audio, beam_size=5, language="ja")
     
     # output file type is txt
     def outputTxt(self, output_text_file,count):
@@ -67,3 +80,6 @@ class speechToTextOnWhisperModel:
         converter = opencc.OpenCC('s2t')
         traditional_text = converter.convert(simplified_text)
         return traditional_text
+    
+    
+

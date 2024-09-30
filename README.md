@@ -24,7 +24,7 @@ Issues:
 1. It is unclear if the dependencies in the requirements file are complete.
 2. The functionality for local sources is actually incomplete.
 3. When processing videos longer than 5 minutes, sometimes only the first 5 minutes are processed.
-4. When processing certain videos, the program may suddenly stop and only output partial results.
+4. When processing certain videos, the program may suddenly stop and only output partial results.(It has been fixed; a language selection option has been added. If this issue occurs again, try resolving it by choosing a different language option.)
 5. There may be other issues not mentioned.
 
 
@@ -54,6 +54,6 @@ Issues:
 1. dependcy不太確定是不是只有requirements中的那些
 2. 來源為本地的功能其實並不完整
 3. 處理超過5分鐘影片時，有時候只會處理到前五分鐘
-4. 處理特定影片時，程式可能會突然中斷，並且僅輸出部分結果
+4. 處理特定影片時，程式可能會突然中斷，並且僅輸出部分結果(已修復；新增語言選項，若遇到此問題時，嘗試使用選擇語言來解決此問題)
 5. 可能有其他未提及的問題
 
