@@ -1,4 +1,3 @@
-
 class time_process:
     def __init__(self,need_process):
         self.secondsProcess = need_process
