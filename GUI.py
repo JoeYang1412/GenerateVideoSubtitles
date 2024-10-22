@@ -86,7 +86,7 @@ class DownloadAndProcessThread(QThread):
                     self.model_process(filename,count)
             else:
                 #如果input_text是本地檔案，就直接轉換成wav
-                need_process = now_convert.VideoConvert(self.input_text, "./")
+                need_process = now_convert.VideoConvert(self.input_text, "")
                 if self.input_text[-3:] == 'wav':
                     filename = self.input_text
                 #如果是mp3就轉換成wav
@@ -95,8 +95,9 @@ class DownloadAndProcessThread(QThread):
                 #如果是mp4就轉換成wav
                 elif self.input_text[-3:] == 'mp4':
                     filename = need_process.local_mp4_convert_to_wav()
+                elif self.input_text[-3:] == 'm4a':
+                    filename = need_process.m4a_convert_to_wav()
 
-        
                 self.progress.emit("轉換完成")
                 #執行模型
                 self.model_process(filename,count)
@@ -216,7 +217,7 @@ class MyApp(QMainWindow):
             self.file_button.setEnabled(True)
 
     def browse_file(self):
-        file_name, _ = QFileDialog.getOpenFileName(self, "選擇檔案", "", "影片檔案 (*.mp4 *.avi *.mov), 音訊檔案 (*.wav *.mp3)")
+        file_name, _ = QFileDialog.getOpenFileName(self, "選擇檔案", "", "影片檔案 (*.mp4 *.avi *.mov), 音訊檔案 (*.wav *.mp3 *.m4a)")
         if file_name:
             self.file_input.setText(file_name)
 
