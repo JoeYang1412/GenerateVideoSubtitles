@@ -1,0 +1,6 @@
+faster-whisper==1.0.3
+moviepy==1.0.3
+OpenCC==1.1.9
+PyQt5==5.15.10
+pysrt==1.1.2
+yt-dlp==2024.10.22
