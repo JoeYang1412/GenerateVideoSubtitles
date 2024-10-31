@@ -1,11 +1,26 @@
 # GenerateVideoSubtitles
 Update on 2024.10.31:  
-Added documentation.  
-Added a simple CLI with usage instructions:  
+Added a simple CLI
+Usage 
 ```
 python CLI.py "your_url"
 ```
-Default model:`large-v2`
+
+The default settings for this command are as follows:  
+Model: `large-v2`  
+Language: `auto`  
+Output file: `output.srt`  
+Note: This feature is newly added and may contain many bugs.
+
+
+To customize settings, use the following command to view configuration options:
+```
+python .\CLI.py -help
+```
+Example configuration: To set the language to `en` and use the `large` model size:
+```
+python .\CLI.py "your_url" --model_size large --language en
+```
 
 This project can convert audio from videos into text. The functionalities include:
 
@@ -45,13 +60,29 @@ Current Issues:
 4. When processing certain videos, the program may suddenly stop and only output partial results.(It has been fixed; a language selection option has been added. If this issue occurs again, try resolving it by choosing a different language option.)
 5. There may be other issues not mentioned.
 
-2024.10.31 更新：
-新增說明  
-新增簡易 CLI，使用方法  
+2024.10.31 更新： 
+新增簡易 CLI  
+使用方法  
 ```
 python CLI.py "your_url"
 ```
-預設使用 `large-v2` 模型
+此命令預設設定如下：  
+使用 `large-v2` 模型  
+語言設定為 `auto`  
+輸出為 `output.srt`  
+
+註：此功能為新增項目，可能存在很多 bug
+
+
+如需要自行設定，請輸入以下命令查看設定方式
+```
+python .\CLI.py -help
+```
+設定範例如下，假設想要設定語言為 `en`，並且使用模型大小為 `large`
+```
+python .\CLI.py "your_url" --model_size large --language en
+```
+
 
 本專案可以將影片中的聲音，轉換成文字  
 功能有
