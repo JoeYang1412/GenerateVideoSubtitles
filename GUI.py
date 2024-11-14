@@ -19,6 +19,11 @@ class DownloadAndProcessThread(QThread):
         self.output_selected_option = output_selected_option
         self.sel_lang_option=sel_lang_option
 
+    def get_file_name(self,input_file_path):
+        # 移除副檔名
+        base = os.path.splitext(input_file_path)[0]
+        return base
+
     def model_process(self, filename,count):
         
         #speechToTextOnWhisperModel是個class，處理語音轉文字，這邊是初始化
@@ -46,10 +51,12 @@ class DownloadAndProcessThread(QThread):
 
         #輸出檔案
         if self.output_selected_option == "文字檔(.txt)":
-            process_audio.outputTxt("./result.txt",count)
+            result_filename=self.get_file_name(filename)+".txt"
+            process_audio.outputTxt(result_filename,count)
             
         elif self.output_selected_option == "字幕檔(.srt)":
-            process_audio.outputSrt("./result.srt",count)
+            result_filename=self.get_file_name(filename)+".srt"
+            process_audio.outputSrt(result_filename,count)
            
     
     def run(self):
