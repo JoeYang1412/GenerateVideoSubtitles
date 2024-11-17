@@ -56,24 +56,15 @@ class speechToTextOnWhisperModel:
                     f.write(f"[{start} -> {end}] {self.outputTraditionalTxt(segment.text)}\n")
         
     # output file type is srt
-    def outputSrt(self, output_srt_file,count):
-        # count is the number of times the function is called
-        # if count is 0, create a new file
-        # if count is not 0, append to the existing file
-        if count == 0:
-            srt = pysrt.SubRipFile()
-        else:
-            try:
-                srt = pysrt.open(output_srt_file, encoding='utf-8')
-            except FileNotFoundError:
-                srt = pysrt.SubRipFile()
+    def outputSrt(self, output_srt_file, count):
+        mode = 'w' if count == 0 else 'a'
+        with open(output_srt_file, mode, encoding='utf-8') as f:
+            for i, segment in enumerate(self.segments, start=1):
+                start = time_process.time_process(segment.start + self.offset).process()
+                end = time_process.time_process(segment.end + self.offset).process()
+                text = self.outputTraditionalTxt(segment.text)
+                f.write(f"{i}\n{start} --> {end}\n{text}\n\n")
 
-        for i, segment in enumerate(self.segments, start=len(srt) + 1):
-            start = time_process.time_process(segment.start+self.offset).process()
-            end = time_process.time_process(segment.end+self.offset).process()
-            srt.append(pysrt.SubRipItem(index=i, start=start, end=end, text=self.outputTraditionalTxt(segment.text)))
-
-        srt.save(output_srt_file, encoding='utf-8')
 
     # output simplified chines to traditional chinese
     def outputTraditionalTxt(self, simplified_text):
