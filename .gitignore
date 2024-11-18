@@ -4,3 +4,4 @@ faster-whisper
 __pycache__
 nEWGUI.py
 test.py
+outputSubtitles.py

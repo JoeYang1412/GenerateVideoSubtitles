@@ -60,6 +60,15 @@ Current Issues:
 4. When processing certain videos, the program may suddenly stop and only output partial results.(It has been fixed; a language selection option has been added. If this issue occurs again, try resolving it by choosing a different language option.)
 5. There may be other issues not mentioned.
 
+
+2024.11.18 更新：
+新增 CLI，GUI 在此版本中不可用
+若前一次使用的模型與此次要使用的模型相同，不需重新加載
+CLI 用法與之前相同
+已知問題：在 `large`,`large-v2`,`large-v3` 之間相互切換可能導致程式崩潰
+
+
+
 2024.10.31 更新： 
 新增簡易 CLI  
 使用方法  

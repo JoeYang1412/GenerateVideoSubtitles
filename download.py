@@ -1,14 +1,22 @@
 import yt_dlp
 from yt_dlp.utils import download_range_func
+import re
 class Download:
     def __init__(self, url, output_path):
         self.url = url
         self.output_path = output_path
-        self.fixed_filename = url.split('=')[-1]
+        self.fixed_filename = self.remove_special_characters(url.split('=')[-1])
+    
+    #移除特殊字元    
+    def remove_special_characters(self, filename):
+        # 使用Regular Expression移除非英文及數字的字元
+        # remove non-alphanumeric characters using Regular Expression
+        return re.sub(r'[^a-zA-Z0-9]', '', filename)
         
     # 下載 m4a 檔案
     # download m4a file
     def download_m4a(self):
+
         # options
         ydl_opts = {
             'format': 'bestaudio[ext=m4a]/best[ext=m4a]',
