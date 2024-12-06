@@ -17,10 +17,12 @@ class VideoConvert:
     # 將 mp4 轉換成 wav
     # convert mp4 to wav
     def local_mp4_convert_to_wav(self):
-        # final output path 
-        self.final_output_path = self.output_path + self.input_path[:-4]+'.wav'
-        video = VideoFileClip(self.input_path)
-        video.audio.write_audiofile(self.final_output_path)
+        if self.input_path[-3:] == 'wav':
+            return "已經是wav檔案"
+        # convert m4a to wav
+        self.final_output_path = change_extension_to_wav(self.input_path)
+        audio=AudioFileClip(self.input_path)
+        audio.write_audiofile(self.final_output_path)
         # return final output path(filename)
         return self.final_output_path
         

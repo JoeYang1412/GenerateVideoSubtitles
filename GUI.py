@@ -5,6 +5,7 @@ from analyze import speechToTextOnWhisperModel
 from download import Download
 import convert as now_convert
 import os
+import outputSubtitles 
 class DownloadAndProcessThread(QThread):
     progress = pyqtSignal(str)
     finished = pyqtSignal()
@@ -32,12 +33,14 @@ class DownloadAndProcessThread(QThread):
         process_audio.offset = count*300
         process_audio.setDeviceSetting('cuda')
         process_audio.setComputeTypeSetting('float16')
+       
 
         #設定模型種類
         self.progress.emit(f"選擇的選項是: {self.selected_option}")
         self.progress.emit(f"選擇的語言: {self.sel_lang_option}")
         self.progress.emit("處理中")
         process_audio.setModelSize(self.selected_option)
+        process_audio.loadModel()
 
         #執行模型
         if self.sel_lang_option == "中文(Chinese)":
@@ -49,14 +52,16 @@ class DownloadAndProcessThread(QThread):
         elif self.sel_lang_option == "自動(Auto)":
             process_audio.runModel(filename)
 
+        analyze_result=process_audio.get_result()
         #輸出檔案
+        output_result=outputSubtitles.subtitles(analyze_result)
         if self.output_selected_option == "文字檔(.txt)":
             result_filename=self.get_file_name(filename)+".txt"
-            process_audio.outputTxt(result_filename,count)
+            output_result.outputTxt(result_filename,count)
             
         elif self.output_selected_option == "字幕檔(.srt)":
             result_filename=self.get_file_name(filename)+".srt"
-            process_audio.outputSrt(result_filename,count)
+            output_result.outputSrt(result_filename,count)
            
     
     def run(self):
@@ -91,6 +96,8 @@ class DownloadAndProcessThread(QThread):
                     filename=need_process.m4a_convert_to_wav()
                     #執行模型
                     self.model_process(filename,count)
+                    print("處理完成，返回主選單")
+
             else:
                 #如果input_text是本地檔案，就直接轉換成wav
                 need_process = now_convert.VideoConvert(self.input_text, "")

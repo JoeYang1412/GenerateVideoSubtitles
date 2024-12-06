@@ -61,3 +61,4 @@ class Download:
             
             info = ydl.extract_info(self.url, download=False)
             return info['duration'] 
+

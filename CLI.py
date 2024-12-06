@@ -4,10 +4,18 @@ from download import Download
 import convert as now_convert
 import sys
 import gc
+import outputSubtitles 
+import time as t
 def get_file_name(input_file_path):
     return os.path.splitext(input_file_path)[0]
 
-def initialize_audio_model(process_audio:speechToTextOnWhisperModel, selected_option, count):
+
+def initialize_output_result(analyze_result):
+    return outputSubtitles.subtitles(analyze_result)
+     
+
+def initialize_audio_model(selected_option, count):
+    process_audio = speechToTextOnWhisperModel()
     process_audio.offset = count * 300
     process_audio.setDeviceSetting('cuda')
     process_audio.setComputeTypeSetting('float16')
@@ -15,7 +23,7 @@ def initialize_audio_model(process_audio:speechToTextOnWhisperModel, selected_op
     process_audio.loadModel()
     return process_audio
 
-def run_model(process_audio, filename, sel_lang_option):
+def run_model(process_audio:speechToTextOnWhisperModel, filename, sel_lang_option):
     
     print("處理中...")
     language_methods = {
@@ -29,12 +37,14 @@ def run_model(process_audio, filename, sel_lang_option):
         method(filename)
     else:
         raise ValueError(f"未支援的語言選項: {sel_lang_option}")
+    return process_audio.get_result()
 
-def output_result(process_audio, filename, count, output_selected_option):
+def output_result(run_model_result,filename ,count,output_selected_option):
+    result=initialize_output_result(run_model_result)
     print("輸出檔案中...")
     output_methods = {
-        "txt": lambda: process_audio.outputTxt(get_file_name(filename) + ".txt", count),
-        "srt": lambda: process_audio.outputSrt(get_file_name(filename) + ".srt", count)
+        "txt": lambda: result.outputTxt(get_file_name(filename) + ".txt", count),
+        "srt": lambda: result.outputSrt(get_file_name(filename) + ".srt", count)
     }
     method = output_methods.get(output_selected_option)
     if method:
@@ -43,7 +53,7 @@ def output_result(process_audio, filename, count, output_selected_option):
         raise ValueError(f"未支援的輸出選項: {output_selected_option}")
     print("完成處理")
 
-def handle_online_input(input_text, selected_option, output_selected_option, sel_lang_option, process_audio):
+def handle_online_input(input_text, selected_option, output_selected_option, sel_lang_option):
     download = Download(input_text, "./")
     time = download.get_time_info()
     
@@ -54,18 +64,20 @@ def handle_online_input(input_text, selected_option, output_selected_option, sel
             print(f"下載第 {count + 1} 段中...")
             filename = download.download_section_m4a(i, i + 300)
             wav_name = convert_to_wav(filename)
-            initialize_audio_model(process_audio, selected_option, count)
-            run_model(process_audio, wav_name, sel_lang_option)
-            output_result(process_audio, wav_name, count, output_selected_option)
+            analyze_model=initialize_audio_model( selected_option, count)
+            run_model_result=run_model(analyze_model, wav_name, sel_lang_option)
+            output_result(run_model_result,wav_name ,count,output_selected_option)
             count += 1
     else:
         print("下載中...")
         filename = download.download_m4a()
         wav_name = convert_to_wav(filename)
-        initialize_audio_model(process_audio, selected_option, count)
-        run_model(process_audio, wav_name, sel_lang_option)
-        output_result(process_audio, wav_name, count, output_selected_option)
+        analyze_model=initialize_audio_model(selected_option, count)
+        run_model_result=run_model(analyze_model, wav_name, sel_lang_option)
+        output_result(run_model_result,wav_name ,count,output_selected_option)
         print("處理完成，返回主選單")
+        
+        
 
 def convert_to_wav(filename):
     print("轉換格式中...")
@@ -74,8 +86,10 @@ def convert_to_wav(filename):
     os.remove(filename)
     return new_name
 
-def process_local_file(input_text, selected_option, output_selected_option, sel_lang_option, process_audio):
+def process_local_file(input_text:str, selected_option, output_selected_option, sel_lang_option):
     need_process = now_convert.VideoConvert(input_text, "")
+    cleaned_input = input_text.strip('"')
+    file_extension = cleaned_input.split('.')[-1]
     if input_text.endswith('wav'):
         wav_name = input_text
     else:
@@ -84,26 +98,26 @@ def process_local_file(input_text, selected_option, output_selected_option, sel_
             'mp4': need_process.local_mp4_convert_to_wav,
             'm4a': need_process.m4a_convert_to_wav
         }
-        method = conversion_methods.get(input_text[-3:])
+        method = conversion_methods.get(file_extension)
         if method:
             wav_name = method()
         else:
             raise ValueError("無法處理的本地檔案格式")
     count = 0
     #還有超過五分鐘的處理方法未添加
-    initialize_audio_model(process_audio, selected_option, count)
-    run_model(process_audio, wav_name, sel_lang_option)
-    output_result(process_audio, wav_name, count, output_selected_option)
+    analyze_model=initialize_audio_model( selected_option, count)
+    run_model_result=run_model(analyze_model, wav_name, sel_lang_option)
+    output_result(run_model_result,wav_name ,count,output_selected_option)
     print("處理完成，返回主選單")
+    
 
-def create_obj():
-    return speechToTextOnWhisperModel()
 
 def main():
     # 在主函數中創建 process_audio 實例
     
-    process_audio = create_obj()
+    
     while True:
+        
         print("\n主選單:")
         print("1. 分析影片/音訊")
         print("2. 離開")
@@ -114,13 +128,13 @@ def main():
             input_text = input("請輸入影片網址或本地檔案路徑: ")
 
             # 選擇模型大小
-            model_options = ["small", "medium", "large", "large-v2", "large-v3"]
+            model_options = ["small", "medium",  "large-v2"]
             print("請選擇模型大小:")
             for idx, option in enumerate(model_options, 1):
                 print(f"{idx}. {option}")
-            selected_option_index = int(input("輸入選項編號 (默認為 4): ") or 4) - 1
+            selected_option_index = int(input("輸入選項編號 (默認為 3): ") or 3) - 1
             selected_option = model_options[selected_option_index]
-           
+        
             # 選擇語言
             lang_options = ["Auto", "Chinese", "English", "Japanese"]
             print("請選擇語言:")
@@ -137,21 +151,20 @@ def main():
             output_selected_option_index = int(input("輸入選項編號 (默認為 2): ") or 2) - 1
             output_selected_option = output_options[output_selected_option_index]
             
-            
-            
-        
             try:
                 if input_text.startswith("https"):
                     try:
+                       
                         
-                        handle_online_input(input_text, selected_option, output_selected_option, sel_lang_option, process_audio)
+                        handle_online_input(input_text, selected_option, output_selected_option, sel_lang_option)
+                        
                     except Exception as e:
                         print(f"處理過程中發生錯誤: {str(e)}")
                         with open("error_log.txt", "a") as log_file:
                             log_file.write(f"Process Error: {str(e)}\n")
                 else:
                     
-                    process_local_file(input_text, selected_option, output_selected_option, sel_lang_option, process_audio)
+                    process_local_file(input_text, selected_option, output_selected_option, sel_lang_option)
 
 
             except Exception as e:
@@ -164,8 +177,9 @@ def main():
         else:
             print("無效的選項，請重新選擇。")
         
-       
+        
 
+      
 if __name__ == "__main__":
     try:
         main()
