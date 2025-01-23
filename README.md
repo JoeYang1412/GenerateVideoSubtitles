@@ -1,4 +1,6 @@
 # GenerateVideoSubtitles
+
+## Features
 This project allows converting audio from videos into text.
 Features include:
 
@@ -86,7 +88,21 @@ Returning to main menu.
 Current Issues:
 There may be unknown issues.
 
+## Contribution
+Found an issue or have a suggestion?
 
+You can help with the following:
+
+Report issues: Check the Issues page, or if not reported, create a new issue.
+
+Submit changes: Fork the project, modify the code, and submit a pull request.
+
+Improve documentation: If you find errors or omissions in the documentation, feel free to supplement and submit.
+
+Thank you for your contribution to making this project better! 😊
+
+---
+## 功能及特色
 
 本專案可以將影片中的聲音，轉換成文字  
 功能有
@@ -171,3 +187,16 @@ MoviePy - Done.
 目前有以下幾個問題
 1. 可能有未知的問題
 
+## 貢獻方式
+
+發現問題或有建議？
+
+您可以協助以下事項：
+
+回報問題：查看 Issues 頁面，或如果尚未回報，請創建新的 Issue。
+
+提交修改：Fork 專案、修改原始碼，並發起 Pull Request。
+
+增修相關文檔：若發現文件錯誤或缺失，歡迎進行補充並提交。
+
+感謝您的貢獻，讓這個專案變得更好！😊
