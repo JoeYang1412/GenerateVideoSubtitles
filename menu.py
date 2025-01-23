@@ -1,12 +1,12 @@
 import os
+import sys
+import torch
 from analyze import speechToTextOnWhisperModel
 from download import Download
 import convert as now_convert
-import sys
-import outputSubtitles 
+import outputSubtitles
 import multiprocessing
 from multiprocessing import Process, Manager
-import torch
 """
 Function:
     get_file_name(input_file_path): Get the file name without the extension.
