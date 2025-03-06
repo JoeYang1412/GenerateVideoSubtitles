@@ -26,6 +26,14 @@ class subtitles:
                 start = time_process.time_process(segment.start).process()
                 end = time_process.time_process(segment.end).process()
                 f.write(f"[{start} -> {end}] {self.outputTraditionalTxt(segment.text)}\n")
+    
+    def onlyTxt(self, output_text_file):
+        # Output the subtitles in txt format
+        # The text is converted to traditional Chinese using OpenCC
+        # only text，no start time and end time
+        with open(output_text_file, 'w', encoding='utf-8') as f:
+            for segment in self.segments:
+                f.write(f"{self.outputTraditionalTxt(segment.text)}\n")
         
 
     def outputSrt(self, output_srt_file):

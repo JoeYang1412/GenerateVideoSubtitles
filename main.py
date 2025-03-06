@@ -59,7 +59,8 @@ def output_result(run_model_result, filename,output_selected_option):
     print("輸出檔案中...")
     output_methods = {
         "txt": lambda: result.outputTxt(get_file_name(filename) + ".txt"),
-        "srt": lambda: result.outputSrt(get_file_name(filename) + ".srt")
+        "srt": lambda: result.outputSrt(get_file_name(filename) + ".srt"),
+        "onlyTxt": lambda: result.onlyTxt(get_file_name(filename) + ".txt")
     }
     method = output_methods.get(output_selected_option)
     if method:
@@ -177,7 +178,7 @@ def main():
             sel_lang_option = lang_options[sel_lang_option_index]
 
 
-            output_options = ["txt", "srt"]
+            output_options = ["txt", "srt","onlyTxt"]
             print("請選擇輸出格式:")
             for idx, option in enumerate(output_options, 1):
                 print(f"{idx}. {option}")
